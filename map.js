@@ -1,5 +1,5 @@
 let map = L.map('map', {
-    center: [-20, -60],
+    center: [-25, -60],
     zoom: 3,
     worldCopyJump: true
 });
