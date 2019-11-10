@@ -22,8 +22,9 @@ let geojsonMarkerOptions = {
 
 const url = 'https://gist.githubusercontent.com/ajgeers/015e164b166a81c6ae5d4be4fd61b331/raw/3ee159a555e73e3aabcd587f1af1d10eb8738e5d/itinerary.csv';
 
+const southAmericanCountries = ['Brazil', 'Argentina', 'Chile', 'Bolivia', 'Peru', 'Ecuador', 'Colombia']
 function filterCSV(row, index, columns) {
-    if (row.latitude !== '') {
+    if (row.latitude !== '' && southAmericanCountries.includes(row.country)) {
         return row;
     }
 }
