@@ -20,6 +20,12 @@ let geojsonMarkerOptions = {
     fillOpacity: 1
 };
 
+function popupContent(feature, layer) {
+layer.bindPopup("<b>" + feature.properties.placename + ", " +
+                feature.properties.country + "</b> <br>" +
+                feature.properties.dates.join('<br>'))
+};
+
 const url = 'https://gist.githubusercontent.com/ajgeers/015e164b166a81c6ae5d4be4fd61b331/raw/3ee159a555e73e3aabcd587f1af1d10eb8738e5d/itinerary.csv';
 
 const southAmericanCountries = ['Brazil', 'Argentina', 'Chile', 'Bolivia', 'Peru', 'Ecuador', 'Colombia']
@@ -68,6 +74,7 @@ d3.csv(url, filterCSV).then(function(data) {
     };
 
     L.geoJSON(pointsGeojson, {
+        onEachFeature: popupContent,
         pointToLayer: function(feature, latlng) {
             return L.circleMarker(latlng, geojsonMarkerOptions);
         }
