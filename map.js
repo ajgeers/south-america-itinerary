@@ -5,6 +5,8 @@ let map = L.map('map', {
     worldCopyJump: true
 });
 
+let myRenderer = L.canvas({ padding: 0.5, tolerance: 20 });
+
 L.tileLayer(
     'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: '&copy; <a href="http://mapbox.com">Mapbox</a>, &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>',
@@ -97,6 +99,7 @@ d3.csv(url, filterCSV).then(function(data) {
 
     L.geoJSON(pointsGeojson, {
         onEachFeature: popupContent,
+        renderer: myRenderer,
         pointToLayer: function(feature, latlng) {
             return L.circleMarker(latlng, geojsonMarkerOptions);
         }
