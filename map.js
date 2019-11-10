@@ -21,14 +21,33 @@ let geojsonMarkerOptions = {
 };
 
 function popupContent(feature, layer) {
-layer.bindPopup("<b>" + feature.properties.placename + ", " +
-                feature.properties.country + "</b> <br>" +
-                feature.properties.dates.join('<br>'))
+    layer.bindPopup("<b>" + feature.properties.placename + ", " +
+        feature.properties.country + "</b> <br>" +
+        feature.properties.dates.join('<br>'))
+};
+
+function connectPoints(data) {
+    let line = [];
+    let previousLatitude;
+    for (let i = 0; i < data.length; i += 1) {
+        d = data[i]
+        if (d.latitude !== previousLatitude) {
+            line.push([+d.latitude, +d.longitude]);
+            previousLatitude = d.latitude;
+        }
+    }
+    return line;
+}
+
+let polylineOptions = {
+    color: 'black',
+    weight: 1,
 };
 
 const url = 'https://gist.githubusercontent.com/ajgeers/015e164b166a81c6ae5d4be4fd61b331/raw/3ee159a555e73e3aabcd587f1af1d10eb8738e5d/itinerary.csv';
 
 const southAmericanCountries = ['Brazil', 'Argentina', 'Chile', 'Bolivia', 'Peru', 'Ecuador', 'Colombia']
+
 function filterCSV(row, index, columns) {
     if (row.latitude !== '' && southAmericanCountries.includes(row.country)) {
         return row;
@@ -36,6 +55,8 @@ function filterCSV(row, index, columns) {
 }
 
 d3.csv(url, filterCSV).then(function(data) {
+
+    L.polyline(connectPoints(data), polylineOptions).addTo(map);
 
     let pointsJson = d3.nest()
         .key(d => d.latitude) // assuming location latitude is unique
