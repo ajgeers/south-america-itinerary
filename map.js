@@ -1,7 +1,4 @@
 let map = L.map('map', {
-    center: [-30, -60],
-    zoom: 3,
-    zoomSnap: 0.5,
     worldCopyJump: true
 });
 
@@ -45,73 +42,85 @@ let polylineOptions = {
     weight: 1,
 };
 
-const url = 'https://gist.githubusercontent.com/ajgeers/015e164b166a81c6ae5d4be4fd61b331/raw/dd79776a74cf2c709922318daeb1a74b3a578cf0/itinerary.csv';
-
-const southAmericanCountries = ['Brazil', 'Argentina', 'Chile', 'Bolivia', 'Peru', 'Ecuador', 'Colombia']
-
 function filterCSV(row, index, columns) {
-    if (row.latitude !== '' && southAmericanCountries.includes(row.country)) {
+    if (row.latitude !== '') {
         return row;
     }
 }
 
-d3.csv(url, filterCSV).then(function(data) {
+const tripSelector = document.getElementById('trip-selector');
 
-    L.polyline(connectPoints(data), polylineOptions).addTo(map);
-
-    let pointsJson = d3.nest()
-        .key(d => d.latitude) // assuming location latitude is unique
-        .rollup(v => ({
-            placename: v[0].placename,
-            country: v[0].country,
-            nights: v.length,
-            latitude: +v[0].latitude,
-            longitude: +v[0].longitude,
-            dates: v.map(e => e.date)
-        }))
-        .entries(data)
-        .map(e => e.value);
-
-    let pointsGeojsonFeatures = [];
-    pointsJson.forEach(function(point) {
-        let feature = {
-            type: 'Feature',
-            properties: {
-                placename: point.placename,
-                country: point.country,
-                nights: point.nights,
-                dates: point.dates
-            },
-            geometry: {
-                type: 'Point',
-                coordinates: [point.longitude, point.latitude]
-            }
-        };
-        pointsGeojsonFeatures.push(feature);
-    });
-
-    let pointsGeojson = {
-        type: 'FeatureCollection',
-        features: pointsGeojsonFeatures
-    };
-
-    L.geoJSON(pointsGeojson, {
-        pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
-    }).addTo(map);
-
-    // HACK: Make it easier to tap on markers on small devices by adding
-    // larger, invisible circleMarkers
-    L.geoJSON(pointsGeojson, {
-        onEachFeature: popupContent,
-        pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, {
-                radius: 10,
-                fillOpacity: 0,
-                opacity: 0
-            });
-        }
-    }).addTo(map);
-
+tripSelector.addEventListener('change', function() {
+    const selectedTrip = tripSelector.value;
+    loadTripData(`./data/${selectedTrip}`);
 });
+
+function loadTripData(url) {
+    d3.csv(url, filterCSV).then(function(data) {
+        map.eachLayer(function(layer) {
+            if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.GeoJSON) {
+                map.removeLayer(layer);
+            }
+        });
+
+        L.polyline(connectPoints(data), polylineOptions).addTo(map);
+
+        let pointsJson = d3.nest()
+            .key(d => d.latitude) // assuming location latitude is unique
+            .rollup(v => ({
+                placename: v[0].placename,
+                country: v[0].country,
+                nights: v.length,
+                latitude: +v[0].latitude,
+                longitude: +v[0].longitude,
+                dates: v.map(e => e.date)
+            }))
+            .entries(data)
+            .map(e => e.value);
+
+        let pointsGeojsonFeatures = [];
+        pointsJson.forEach(function(point) {
+            let feature = {
+                type: 'Feature',
+                properties: {
+                    placename: point.placename,
+                    country: point.country,
+                    nights: point.nights,
+                    dates: point.dates
+                },
+                geometry: {
+                    type: 'Point',
+                    coordinates: [point.longitude, point.latitude]
+                }
+            };
+            pointsGeojsonFeatures.push(feature);
+        });
+
+        let pointsGeojson = {
+            type: 'FeatureCollection',
+            features: pointsGeojsonFeatures
+        };
+
+        L.geoJSON(pointsGeojson, {
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, geojsonMarkerOptions);
+            }
+        }).addTo(map);
+
+        // HACK: Make it easier to tap on markers on small devices by adding
+        // larger, invisible circleMarkers
+        L.geoJSON(pointsGeojson, {
+            onEachFeature: popupContent,
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 10,
+                    fillOpacity: 0,
+                    opacity: 0
+                });
+            }
+        }).addTo(map);
+
+        let bounds = L.geoJSON(pointsGeojson).getBounds();
+        map.fitBounds(bounds);
+    });
+}
