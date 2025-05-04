@@ -1,3 +1,1 @@
-# South America Itinerary
-
-[Click here](https://ajgeers.github.io/south-america-itinerary) to view a map of our 2018/2019 trip through South America.
+Check out maps of some of my trips [here](https://ajgeers.github.io/trips).
