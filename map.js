@@ -1,4 +1,5 @@
 let map = L.map('map', {
+    zoomSnap: 0.5,
     worldCopyJump: true
 });
 
