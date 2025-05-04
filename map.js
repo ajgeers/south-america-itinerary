@@ -8,6 +8,8 @@ L.tileLayer(
         attribution: '&copy; <a href="http://mapbox.com">Mapbox</a>, &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>',
         id: 'mapbox/streets-v11',
         accessToken: 'pk.eyJ1IjoiYWpnZWVycyIsImEiOiJjaWs5cHZmMWswZDJ6dmhrdTg3YnNidW44In0.QPU_FxLe89puMPjldiaFCg',
+        tileSize: 512,
+        zoomOffset: -1
     }).addTo(map);
 
 let geojsonMarkerOptions = {
